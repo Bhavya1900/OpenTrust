@@ -1,0 +1,62 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.TransactionsPage = void 0;
+const jsx_runtime_1 = require("react/jsx-runtime");
+const react_1 = require("react");
+const OpenTrustContext_1 = require("../context/OpenTrustContext");
+const bankService_1 = require("../services/mock/bankService");
+const formatters_1 = require("../utils/formatters");
+const lucide_react_1 = require("lucide-react");
+const Button_1 = require("../components/common/Button");
+const EmptyState_1 = require("../components/common/EmptyState");
+const TransactionsPage = () => {
+    const { transactions } = (0, OpenTrustContext_1.useOpenTrust)();
+    const [searchQuery, setSearchQuery] = (0, react_1.useState)('');
+    const [typeFilter, setTypeFilter] = (0, react_1.useState)('ALL');
+    const [categoryFilter, setCategoryFilter] = (0, react_1.useState)('ALL');
+    const [sortBy, setSortBy] = (0, react_1.useState)('date-desc');
+    // Available unique categories
+    const categories = (0, react_1.useMemo)(() => {
+        const set = new Set(transactions.map((t) => t.category));
+        return Array.from(set);
+    }, [transactions]);
+    // Filtered transactions
+    const filtered = (0, react_1.useMemo)(() => {
+        return bankService_1.bankService.filterTransactions(transactions, searchQuery, typeFilter, categoryFilter, sortBy);
+    }, [transactions, searchQuery, typeFilter, categoryFilter, sortBy]);
+    // Dynamically calculate summary totals from the filtered dataset
+    const summaryTotals = (0, react_1.useMemo)(() => {
+        let debits = 0;
+        let credits = 0;
+        filtered.forEach((t) => {
+            if (t.type === 'DEBIT')
+                debits += t.amount;
+            else
+                credits += t.amount;
+        });
+        return { debits, credits, net: credits - debits };
+    }, [filtered]);
+    const handleClearFilters = () => {
+        setSearchQuery('');
+        setTypeFilter('ALL');
+        setCategoryFilter('ALL');
+        setSortBy('date-desc');
+    };
+    const hasActiveFilters = searchQuery.trim() !== '' ||
+        typeFilter !== 'ALL' ||
+        categoryFilter !== 'ALL' ||
+        sortBy !== 'date-desc';
+    return ((0, jsx_runtime_1.jsxs)("div", { className: "space-y-6", children: [(0, jsx_runtime_1.jsxs)("div", { className: "flex flex-col sm:flex-row sm:items-center justify-between gap-4", children: [(0, jsx_runtime_1.jsxs)("div", { children: [(0, jsx_runtime_1.jsx)("h1", { className: "text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight", children: "Transactions Explorer" }), (0, jsx_runtime_1.jsx)("p", { className: "text-xs sm:text-sm text-slate-500 mt-1", children: "Granular financial ledger entries available for consented data sharing" })] }), (0, jsx_runtime_1.jsx)(Button_1.Button, { variant: "outline", size: "sm", leftIcon: (0, jsx_runtime_1.jsx)(lucide_react_1.Download, { className: "w-3.5 h-3.5" }), onClick: () => alert('Simulated export: 18 transaction records exported to CSV.'), children: "Export CSV (Demo)" })] }), (0, jsx_runtime_1.jsxs)("div", { className: "grid grid-cols-1 sm:grid-cols-3 gap-4", children: [(0, jsx_runtime_1.jsxs)("div", { className: "bg-white p-4 rounded-2xl border border-slate-200/90 shadow-xs", children: [(0, jsx_runtime_1.jsx)("span", { className: "text-xs text-slate-400 font-semibold uppercase tracking-wider", children: "Matching Transactions" }), (0, jsx_runtime_1.jsxs)("div", { className: "text-2xl font-extrabold text-slate-900 mt-1", children: [filtered.length, " ", (0, jsx_runtime_1.jsxs)("span", { className: "text-xs text-slate-400 font-normal", children: ["of ", transactions.length] })] })] }), (0, jsx_runtime_1.jsxs)("div", { className: "bg-white p-4 rounded-2xl border border-slate-200/90 shadow-xs", children: [(0, jsx_runtime_1.jsx)("span", { className: "text-xs text-slate-400 font-semibold uppercase tracking-wider", children: "Total Inflow (Credits)" }), (0, jsx_runtime_1.jsxs)("div", { className: "text-2xl font-extrabold text-emerald-600 mt-1", children: ["+", (0, formatters_1.formatINR)(summaryTotals.credits)] })] }), (0, jsx_runtime_1.jsxs)("div", { className: "bg-white p-4 rounded-2xl border border-slate-200/90 shadow-xs", children: [(0, jsx_runtime_1.jsx)("span", { className: "text-xs text-slate-400 font-semibold uppercase tracking-wider", children: "Total Outflow (Debits)" }), (0, jsx_runtime_1.jsxs)("div", { className: "text-2xl font-extrabold text-rose-600 mt-1", children: ["-", (0, formatters_1.formatINR)(summaryTotals.debits)] })] })] }), (0, jsx_runtime_1.jsxs)("div", { className: "bg-white rounded-2xl border border-slate-200/90 shadow-xs p-5 space-y-4", children: [(0, jsx_runtime_1.jsxs)("div", { className: "flex flex-col md:flex-row gap-3", children: [(0, jsx_runtime_1.jsxs)("div", { className: "relative flex-1", children: [(0, jsx_runtime_1.jsx)(lucide_react_1.Search, { className: "w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" }), (0, jsx_runtime_1.jsx)("input", { type: "text", placeholder: "Search by merchant, description, or reference ID...", value: searchQuery, onChange: (e) => setSearchQuery(e.target.value), className: "w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all text-slate-800" }), searchQuery && ((0, jsx_runtime_1.jsx)("button", { onClick: () => setSearchQuery(''), className: "absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600", children: (0, jsx_runtime_1.jsx)(lucide_react_1.X, { className: "w-4 h-4" }) }))] }), (0, jsx_runtime_1.jsxs)("div", { className: "flex items-center bg-slate-100 p-1 rounded-xl self-start md:self-auto", children: [(0, jsx_runtime_1.jsx)("button", { onClick: () => setTypeFilter('ALL'), className: `px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${typeFilter === 'ALL'
+                                            ? 'bg-white text-slate-900 shadow-xs'
+                                            : 'text-slate-600 hover:text-slate-900'}`, children: "All Types" }), (0, jsx_runtime_1.jsx)("button", { onClick: () => setTypeFilter('DEBIT'), className: `px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${typeFilter === 'DEBIT'
+                                            ? 'bg-white text-slate-900 shadow-xs'
+                                            : 'text-slate-600 hover:text-slate-900'}`, children: "Debits" }), (0, jsx_runtime_1.jsx)("button", { onClick: () => setTypeFilter('CREDIT'), className: `px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${typeFilter === 'CREDIT'
+                                            ? 'bg-white text-slate-900 shadow-xs'
+                                            : 'text-slate-600 hover:text-slate-900'}`, children: "Credits" })] })] }), (0, jsx_runtime_1.jsxs)("div", { className: "flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-100", children: [(0, jsx_runtime_1.jsxs)("div", { className: "flex flex-wrap items-center gap-3", children: [(0, jsx_runtime_1.jsxs)("div", { className: "flex items-center gap-2", children: [(0, jsx_runtime_1.jsx)("span", { className: "text-xs font-semibold text-slate-500", children: "Category:" }), (0, jsx_runtime_1.jsxs)("select", { value: categoryFilter, onChange: (e) => setCategoryFilter(e.target.value), className: "bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium px-2.5 py-1.5 text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500", children: [(0, jsx_runtime_1.jsx)("option", { value: "ALL", children: "All Categories" }), categories.map((cat) => ((0, jsx_runtime_1.jsx)("option", { value: cat, children: cat }, cat)))] })] }), (0, jsx_runtime_1.jsxs)("div", { className: "flex items-center gap-2", children: [(0, jsx_runtime_1.jsx)("span", { className: "text-xs font-semibold text-slate-500", children: "Sort By:" }), (0, jsx_runtime_1.jsxs)("select", { value: sortBy, onChange: (e) => setSortBy(e.target.value), className: "bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium px-2.5 py-1.5 text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500", children: [(0, jsx_runtime_1.jsx)("option", { value: "date-desc", children: "Newest First" }), (0, jsx_runtime_1.jsx)("option", { value: "date-asc", children: "Oldest First" }), (0, jsx_runtime_1.jsx)("option", { value: "amount-desc", children: "Highest Amount" }), (0, jsx_runtime_1.jsx)("option", { value: "amount-asc", children: "Lowest Amount" })] })] })] }), hasActiveFilters && ((0, jsx_runtime_1.jsxs)("button", { onClick: handleClearFilters, className: "text-xs font-semibold text-blue-600 hover:text-blue-800 flex items-center gap-1", children: [(0, jsx_runtime_1.jsx)(lucide_react_1.Filter, { className: "w-3.5 h-3.5" }), "Clear all filters"] }))] })] }), filtered.length === 0 ? ((0, jsx_runtime_1.jsx)(EmptyState_1.EmptyState, { icon: lucide_react_1.Receipt, title: "No transactions found", description: "None of your seeded transactions matched the selected filters. Try broadening your search or resetting filters.", action: (0, jsx_runtime_1.jsx)(Button_1.Button, { variant: "outline", size: "sm", onClick: handleClearFilters, children: "Reset Filters" }) })) : ((0, jsx_runtime_1.jsx)("div", { className: "bg-white rounded-2xl border border-slate-200/90 shadow-xs overflow-hidden", children: (0, jsx_runtime_1.jsx)("div", { className: "overflow-x-auto", children: (0, jsx_runtime_1.jsxs)("table", { className: "w-full text-left border-collapse text-xs", children: [(0, jsx_runtime_1.jsx)("thead", { children: (0, jsx_runtime_1.jsxs)("tr", { className: "bg-slate-50/80 border-b border-slate-200 text-slate-500 uppercase tracking-wider font-semibold text-[11px]", children: [(0, jsx_runtime_1.jsx)("th", { className: "py-3.5 px-4 sm:px-6", children: "Transaction Description" }), (0, jsx_runtime_1.jsx)("th", { className: "py-3.5 px-4", children: "Category" }), (0, jsx_runtime_1.jsx)("th", { className: "py-3.5 px-4", children: "Date & Time" }), (0, jsx_runtime_1.jsx)("th", { className: "py-3.5 px-4", children: "Reference ID" }), (0, jsx_runtime_1.jsx)("th", { className: "py-3.5 px-4 sm:px-6 text-right", children: "Amount" })] }) }), (0, jsx_runtime_1.jsx)("tbody", { className: "divide-y divide-slate-100", children: filtered.map((t) => {
+                                    const isCredit = t.type === 'CREDIT';
+                                    return ((0, jsx_runtime_1.jsxs)("tr", { className: "hover:bg-slate-50/60 transition-colors", children: [(0, jsx_runtime_1.jsx)("td", { className: "py-3.5 px-4 sm:px-6", children: (0, jsx_runtime_1.jsxs)("div", { className: "flex items-center gap-3", children: [(0, jsx_runtime_1.jsx)("div", { className: `w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 ${isCredit
+                                                                ? 'bg-emerald-50 text-emerald-600'
+                                                                : 'bg-slate-100 text-slate-700'}`, children: isCredit ? ((0, jsx_runtime_1.jsx)(lucide_react_1.ArrowDownLeft, { className: "w-4 h-4" })) : ((0, jsx_runtime_1.jsx)(lucide_react_1.ArrowUpRight, { className: "w-4 h-4" })) }), (0, jsx_runtime_1.jsxs)("div", { children: [(0, jsx_runtime_1.jsx)("div", { className: "font-bold text-slate-900 text-xs sm:text-sm", children: t.merchantName }), (0, jsx_runtime_1.jsx)("div", { className: "text-slate-500 text-[11px] truncate max-w-xs", children: t.description })] })] }) }), (0, jsx_runtime_1.jsx)("td", { className: "py-3.5 px-4", children: (0, jsx_runtime_1.jsx)("span", { className: "inline-block px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 font-medium text-[11px]", children: t.category }) }), (0, jsx_runtime_1.jsx)("td", { className: "py-3.5 px-4 text-slate-600 font-medium", children: (0, formatters_1.formatDate)(t.timestamp) }), (0, jsx_runtime_1.jsx)("td", { className: "py-3.5 px-4 font-mono text-slate-400 text-[11px]", children: t.referenceNumber }), (0, jsx_runtime_1.jsx)("td", { className: "py-3.5 px-4 sm:px-6 text-right font-extrabold text-xs sm:text-sm", children: (0, jsx_runtime_1.jsx)("span", { className: isCredit ? 'text-emerald-600' : 'text-slate-900', children: isCredit ? `+ ${(0, formatters_1.formatINR)(t.amount)}` : `- ${(0, formatters_1.formatINR)(t.amount)}` }) })] }, t.id));
+                                }) })] }) }) }))] }));
+};
+exports.TransactionsPage = TransactionsPage;
